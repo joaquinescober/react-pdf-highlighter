@@ -54,9 +54,8 @@ const initialUrl = searchParams.get("url") || PRIMARY_PDF_URL;
 class App extends Component<{}, State> {
   state = {
     url: initialUrl,
-    highlights: testHighlights[initialUrl]
-      ? [...testHighlights[initialUrl]]
-      : [],
+    highlights: testHighlights[initialUrl] ? [...testHighlights[initialUrl]] : [],
+    app_url: "https://www.youtube.com", // Default URL for the highlights
   };
 
   resetHighlights = () => {
@@ -75,7 +74,7 @@ class App extends Component<{}, State> {
     });
   };
 
-  scrollViewerTo = (highlight: any) => {};
+  scrollViewerTo = (highlight: any) => { };
 
   scrollToHighlightFromHash = () => {
     const highlight = this.getHighlightById(parseIdFromHash());
@@ -104,8 +103,14 @@ class App extends Component<{}, State> {
 
     console.log("Saving highlight", highlight);
 
+    const self_id = getNextId(); // Generate random self_id
+    const notes_id = "100"; // Fixed notes_id
+
     this.setState({
-      highlights: [{ ...highlight, id: getNextId() }, ...highlights],
+      highlights: [
+        { ...highlight, id: getNextId(), self_id, notes_id },
+        ...highlights,
+      ],
     });
   }
 
@@ -122,18 +127,18 @@ class App extends Component<{}, State> {
         } = h;
         return id === highlightId
           ? {
-              id,
-              position: { ...originalPosition, ...position },
-              content: { ...originalContent, ...content },
-              ...rest,
-            }
+            id,
+            position: { ...originalPosition, ...position },
+            content: { ...originalContent, ...content },
+            ...rest,
+          }
           : h;
       }),
     });
   }
 
   render() {
-    const { url, highlights } = this.state;
+    const { url, highlights, app_url } = this.state;
 
     return (
       <div className="App" style={{ display: "flex", height: "100vh" }}>
@@ -142,23 +147,15 @@ class App extends Component<{}, State> {
           resetHighlights={this.resetHighlights}
           toggleDocument={this.toggleDocument}
         />
-        <div
-          style={{
-            height: "100vh",
-            width: "75vw",
-            position: "relative",
-          }}
-        >
+        <div>
           <PdfLoader url={url} beforeLoad={<Spinner />}>
             {(pdfDocument) => (
               <PdfHighlighter
                 pdfDocument={pdfDocument}
                 enableAreaSelection={(event) => event.altKey}
                 onScrollChange={resetHash}
-                // pdfScaleValue="page-width"
                 scrollRef={(scrollTo) => {
                   this.scrollViewerTo = scrollTo;
-
                   this.scrollToHighlightFromHash();
                 }}
                 onSelectionFinished={(
@@ -171,7 +168,6 @@ class App extends Component<{}, State> {
                     onOpen={transformSelection}
                     onConfirm={(comment) => {
                       this.addHighlight({ content, position, comment });
-
                       hideTipAndSelection();
                     }}
                   />
@@ -194,6 +190,9 @@ class App extends Component<{}, State> {
                       isScrolledTo={isScrolledTo}
                       position={highlight.position}
                       comment={highlight.comment}
+                      url={app_url} // Pass the URL prop
+                      self_id={highlight.self_id} // Pass the self_id prop
+                      notes_id={highlight.notes_id} // Pass the notes_id prop
                     />
                   ) : (
                     <AreaHighlight
@@ -230,5 +229,4 @@ class App extends Component<{}, State> {
     );
   }
 }
-
 export default App;

@@ -1,58 +1,35 @@
 import React, { Component } from "react";
-
 import "../style/Highlight.css";
-
-import type { LTWHP } from "../types.js";
+import type { LTWHP } from "../types";
 
 interface Props {
+  self_id: string;
+  notes_id: string;
   position: {
-    boundingRect: LTWHP;
     rects: Array<LTWHP>;
-  };
-  onClick?: () => void;
-  onMouseOver?: () => void;
-  onMouseOut?: () => void;
-  comment: {
-    emoji: string;
-    text: string;
   };
   isScrolledTo: boolean;
 }
 
 export class Highlight extends Component<Props> {
-  render() {
-    const {
-      position,
-      onClick,
-      onMouseOver,
-      onMouseOut,
-      comment,
-      isScrolledTo,
-    } = this.props;
+  handleOnClick = () => {
+    const { self_id } = this.props;
+    // Navigate to the URL based on the self_id
+    window.location.href = `https://example.com/${self_id}`;
+  };
 
-    const { rects, boundingRect } = position;
+  render() {
+    const { position, isScrolledTo } = this.props;
+    const { rects } = position;
 
     return (
       <div
         className={`Highlight ${isScrolledTo ? "Highlight--scrolledTo" : ""}`}
+        onClick={this.handleOnClick}
       >
-        {comment ? (
-          <div
-            className="Highlight__emoji"
-            style={{
-              left: 20,
-              top: boundingRect.top,
-            }}
-          >
-            {comment.emoji}
-          </div>
-        ) : null}
         <div className="Highlight__parts">
           {rects.map((rect, index) => (
             <div
-              onMouseOver={onMouseOver}
-              onMouseOut={onMouseOut}
-              onClick={onClick}
               key={index}
               style={rect}
               className={`Highlight__part`}
@@ -65,3 +42,6 @@ export class Highlight extends Component<Props> {
 }
 
 export default Highlight;
+
+
+
